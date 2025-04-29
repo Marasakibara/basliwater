@@ -3,7 +3,7 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/webpack",
+      "use": "@vercel/static-build",
       "config": {
         "distDir": "public",  
         "webpack": "webpack.config.js"
