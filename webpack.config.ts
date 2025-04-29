@@ -12,6 +12,7 @@ interface EnvVatiables {
   port?: number;
   analyzer?: boolean;
   platform?: BuildPlatform;
+  base?: string;
 }
 
 export default (env: EnvVatiables) => {
@@ -28,6 +29,7 @@ export default (env: EnvVatiables) => {
     paths,
     analyzer: env.analyzer,
     platform: env.platform ?? "desktop",
+    base: env.base,
   });
   return config;
 };
