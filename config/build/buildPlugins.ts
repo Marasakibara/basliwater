@@ -51,12 +51,13 @@ export default function buildPlugins({
       new CopyPlugin({
         patterns: [
           {
-            from: path.resolve(paths.public, "locales"),
-            to: path.resolve(paths.output, "locales"),
+            from: "public/locales",
+            to: "locales",
+            noErrorOnMissing: true,
           },
           {
-            from: path.resolve(paths.public, "favicon.ico"),
-            to: path.resolve(paths.output, "index.html"),
+            from: "public/favicon.ico",
+            to: ".",
           },
         ],
       })

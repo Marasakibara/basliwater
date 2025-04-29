@@ -17,7 +17,12 @@ interface EnvVatiables {
 
 export default (env: EnvVatiables) => {
   const paths: BuildPaths = {
-    output: path.resolve(__dirname, "build"),
+    output: {
+      path: path.resolve(__dirname, "public"),
+      filename: "js/[name].[contenthash].js",
+      publicPath: "/", // Важно: должен быть "/" для продакшена
+      clean: true,
+    },
     entry: path.resolve(__dirname, "src", "index.tsx"),
     html: path.resolve(__dirname, "public", "index.html"),
     src: path.resolve(__dirname, "src"),
@@ -26,6 +31,7 @@ export default (env: EnvVatiables) => {
   const config: webpack.Configuration = buildWepback({
     port: env.port ?? 3000,
     mode: env.mode ?? "development",
+
     paths,
     analyzer: env.analyzer,
     platform: env.platform ?? "desktop",

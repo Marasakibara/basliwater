@@ -5,7 +5,7 @@ import { LazyAbout } from '@/pages/about/About.lazy';
 import { LazyMain } from '@/pages/main/Main.lazy';
 import { LazyInfo } from '@/pages/info/Info.lazy';
 import { LazyAdmin } from '@/pages/admin/Admin.lazy';
-import { Suspense } from 'react';
+import React, { Suspense, createElement } from 'react';
 import './index.module.scss'
 import { LazyReg } from './pages/reg/reg.lazy';
 import { LazyAuth } from './pages/auth/auth.lazy';

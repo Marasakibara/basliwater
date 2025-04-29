@@ -2,7 +2,12 @@ export interface BuildPaths {
   entry: string;
   html: string;
   public: string;
-  output: string;
+  output: {
+    path: string;
+    filename: string;
+    publicPath: string;
+    clean: boolean;
+  };
   src: string;
 }
 

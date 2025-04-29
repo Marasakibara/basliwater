@@ -15,7 +15,7 @@ export default function buildWepback(
     mode: mode ?? "development",
     entry: paths.entry,
     output: {
-      path: paths.output,
+      path: paths.output.path,
       filename: "[name].[contenthash].js",
       clean: true,
     },

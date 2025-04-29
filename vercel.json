@@ -2,23 +2,18 @@
   "version": 2,
   "builds": [
     {
-      "src": "public/index.html",
-      "use": "@vercel/static-build",
+      "src": "package.json",
+      "use": "@vercel/webpack",
       "config": {
-        "distDir": "public",
-        "includeFiles": [
-          "public/**"
-        ]
+        "distDir": "public",  
+        "webpack": "webpack.config.js"
       }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/index.html",
-      "headers": {
-        "Cache-Control": "s-maxage=31536000, immutable"
-      }
+      "dest": "/public/index.html"  
     }
   ]
 }
