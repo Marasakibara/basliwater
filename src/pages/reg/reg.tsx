@@ -5,9 +5,10 @@ import { Link } from "react-router-dom";
 const Reg = () => {
   const [email, setEmail] = useState('')
   const [backMessage, setBackMessage] = useState('')
+  const [login, setLogin] = useState('')
   const [backCode, setBackCode] = useState(-1)
   const onClickReg = () => {
-    createNewUserProfile(email,).then(
+    createNewUserProfile(email, login).then(
       (message) => {
         setBackCode(message.errorCode)
         setBackMessage(message.errorMessage)
@@ -16,6 +17,10 @@ const Reg = () => {
         }
       }
     )
+  }
+
+  const onChangeNickName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLogin(e.target.value)
   }
   const onChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value)
@@ -27,6 +32,7 @@ const Reg = () => {
       <div>
         <label htmlFor="email">Введите ваш e-mail: </label>
         <input type="email" onChange={onChangeEmail}></input>
+        <input onChange={onChangeNickName} value={login}></input>
         <button onClick={onClickReg}>Зарегестрироваться</button>
         <div>{backMessage}</div>
       </div>

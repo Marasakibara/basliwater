@@ -1,99 +1,125 @@
 import { useEffect, useState } from "react";
 import styles from './Admin.module.scss'
-import { getAllDocsFromFirestore, getDocFromFirestore, setDocToFirestore } from "@/fireworks";
+import { getAllDocsFromFirestore, setDocToFirestore } from "@/fireworks";
 import MusicPlayer from "./components/musicPlayer/musicPlayer";
-import ImagePanel from "./components/imagePanel";
-import MusicPanel from "./components/musicPanel";
-import { useAuth } from "@/auth/AuthContext";
+import ImagePanel from "./components/imagePanel/imagePanel";
+import MusicPanel from "./components/musicPanel/musicPanel";
+import UserPanel from "./components/userPanel/userPanel";
+type docType = {
+  url: string, name: string
+}
+type userType = {
+  imageDoc: docType, musicDoc: docType, message: string, login: string
+}
+type errorType = {
+  code: number,
+  errorText: string,
+}
+const imageProto =
+  "https://sun9-50.userapi.com/impg/rXWzjZ0YoLM8zKVEsqhsHRjjkXrvfK00Z2NBIw/rgwIfC5FwPE.jpg?size=604x604&quality=96&sign=c079d0ccd08a9dd3c15be967e44c1f80&type=album";
+const musicProto =
+  "https://cs21-1v4.vkuseraudio.net/s/v1/ac/63hoYCU_OvmY1uphIIXbBGU8bqkvQjstLwkcV4LMkYV3up_AonrlU6_mfdpDxOJtlUJKwQszqdNix45wvQDLrT0OLgHk5lvdbrMe9gDaR7Eqk9rsdtyVMU3r6m8FsZHNI0b9MSOPwZg5Pn8esMuJT1wwkR0g4GP5-4BDew9mo7eIzxU/index.m3u8?siren=1";
 
-
-const url = 'https://psv4.vkuseraudio.net/s/v1/a2/UMgenzyUHteVY06-TNAkQLLixUvdSbD3nU0mxrDYWQCASiljVwLF2c2Ik6TdM7d1sgrFddzmZwngC8or7QpdBXJlOsAIbp8qM4DtTPQnQKUlBCHrGuRZkMmitmbStj-MN7UbYsm0uKB6hHYwqmhWSDCaB0H3i9ifZA/index.m3u8?siren=1'
 const Admin = () => {
-  const [imageListJSX, setImageListJSX] = useState([<></>])
-  const [docs, setDocs] = useState([] as { url: string, name: string }[])
-  const [imageDoc, setImageDoc] = useState({ 'url': '', 'name': '' })
-  const [musicDoc, setMusicDoc] = useState({ 'url': '', 'name': '' })
-  const [searchMusicValue, setSearchMusicValue] = useState('')
-  const [searchImageValue, setSearchImageValue] = useState('')
-  const [musicListJSX, setMusicListJSX] = useState([<></>])
+  const [images, setImages] = useState([] as docType[])
+  const [users, setUsers] = useState([] as userType[])
+  const [dynamicUsers, setDynamicUsers] = useState([] as userType[])
+  const [musics, setMusics] = useState([] as docType[])
+  const [imageDoc, setImageDoc] = useState({ 'url': imageProto, 'name': '' } as docType)
+  const [musicDoc, setMusicDoc] = useState({ 'url': musicProto, 'name': '123' } as docType)
+  const [newMessage, setNewMessage] = useState('')
+  const [errorCode, setErrorCode] = useState({ code: 0, errorText: 'Нет Ошибок' } as errorType)
+  //const [searchImageValue, setSearchImageValue] = useState('')
+  //const { auth } = useAuth()
 
-  const { auth } = useAuth()
-  const generateImageJSX = (docs: { url: string, name: string }[]) => {
-    const JSXArray = docs.map((doc) => {
-      return (
-        <div key={doc.name}>
-          <input value={doc.name} onClick={() => setImageDoc(doc)}></input>
-          <img className={styles.imageItem} src={doc.url} alt='Картинка отвалилась'></img>
-        </div>)
-    })
-    return JSXArray
+  const onChangeNewMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value)
   }
-  const onChangeSearchMusic = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setSearchMusicValue(value)
-    const newDocs = docs.filter((doc) => { return doc.name.toLowerCase().includes(value.toLowerCase()) })
-    setMusicListJSX(generateMusicJSX(newDocs))
-  }
-  const generateMusicJSX = (docs: { url: string, name: string }[]) => {
-    const JSXArray = docs.map((doc) => {
-      return (
-        <div key={doc.name}>
-          <button onClick={() => { setMusicDoc(doc) }}>{doc.name}</button>
-        </div>)
-    })
-    return JSXArray
-  }
+  const uploadUserData = () => {
+    if (imageDoc.name == '') {
+      console.log(1)
+      setErrorCode({ code: 1, errorText: 'imageDoc пустой' })
+    } else if (musicDoc.name == '') {
+      console.log(2)
+      setErrorCode({ code: 2, errorText: 'musicDoc пустой' })
+    } else if (dynamicUsers.length === 0) {
+      console.log(3)
+      setErrorCode({ code: 3, errorText: 'Получатели не выбраны' })
+    } else {
+      console.log(4)
+      setErrorCode({ code: 0, errorText: 'Нет Ошибок' });
+      dynamicUsers.forEach((user) => {
+        setDocToFirestore('gameSpace', user.login, {
+          imageDoc: imageDoc,
+          message: newMessage,
+          musicDoc: musicDoc,
+          login: user.login
+        })
+      })
+    }
 
+  }
   useEffect(() => {
-    getAllDocsFromFirestore('imageListData').then((resp: { url: string, name: string }[]) => {
-      setImageListJSX(generateImageJSX(resp))
+    getAllDocsFromFirestore('imageListData').then((resp: docType[]) => {
+      setImages(resp)
     })
-    getAllDocsFromFirestore('musicListData').then((resp: { url: string, name: string }[]) => {
-      setDocs(resp)
-      setMusicListJSX(generateMusicJSX(resp))
+    getAllDocsFromFirestore('musicListData').then((resp: docType[]) => {
+      setMusics(resp)
     })
-
+    getAllDocsFromFirestore('gameSpace').then((resp: userType[]) => {
+      console.log(resp)
+      setUsers(resp)
+    })
   }, [])
-  const test = (value: string) => {
-    setMusicDoc({ 'url': value, 'name': '' })
-  }
   const onClickSubmitNewMusic = (name: string, url: string) => {
-    console.log(name, url)
     setDocToFirestore('musicListData', name, {
       name: name,
       url: url
-    })
-    const newMusicUrl = url
-    const newMusicName = name
-    const newDocs = [...docs, { name: newMusicName, url: newMusicUrl }]
-    setDocs(newDocs)
-  }
-  const onSetUpPlayer = (playerName: string, imageUrl: string, musicUrl: string) => {
-    setDocToFirestore('gameSpace', `${playerName}`, {
-      imageUrl,
-      musicUrl
     })
   }
   return (
     <>
       <h1>adminPanel</h1>
-      <div>
-        <ImagePanel></ImagePanel>
-        <ul>
-          {imageListJSX}
-        </ul>
-        <MusicPanel setMusicUrl={test} onClickSubmitNewMusic={onClickSubmitNewMusic}></MusicPanel>
-        <ul>
-          <input type="text" onChange={onChangeSearchMusic} placeholder="Поиск музыки" value={searchMusicValue}></input>
-          {musicListJSX}
-        </ul>
-      </div>
-      <div>
-        <input value={imageDoc.name} />
-        <img className={styles.imageItem} src={imageDoc.url} alt=''></img>
-        <input value={musicDoc.name}></input>
-        <MusicPlayer url={musicDoc.url}></MusicPlayer>
-        <button onClick={() => { onSetUpPlayer(auth.currentUser.displayName, imageDoc.url, musicDoc.url) }}>Отправить</button>
+      <div className={styles.panelContainer}>
+        <div className={styles.panel}>
+          <div className={styles.contrainer}>
+            <ImagePanel setImageDoc={setImageDoc} docs={images}></ImagePanel>
+          </div>
+        </div>
+        <div className={styles.panel}>
+          <div className={styles.contrainer}>
+            <MusicPanel musicDoc={musicDoc} setMusicDoc={setMusicDoc} onClickSubmitNewMusic={onClickSubmitNewMusic} docs={musics}></MusicPanel>
+          </div>
+        </div>
+        <div className={styles.panel}>
+          <div className={styles.contrainer}>
+            <UserPanel
+              users={users}
+              setMusicDoc={setMusicDoc}
+              dynamicUsers={dynamicUsers}
+              setDynamicUsers={setDynamicUsers}
+              setNewMessage={setNewMessage}
+            />
+          </div>
+        </div>
+        <div className={styles.panel}>
+          <div className={styles.contrainer}>
+            <h1 className={styles.whiteText}>Данные: </h1>
+            <div>
+              <label className={styles.whiteText}>{imageDoc.name != '' ? imageDoc.name : 'Картинка: '}</label>
+              <img className={styles.imageItem} src={imageDoc.url} alt='Картинка отвалилась'></img>
+            </div>
+            <label className={styles.whiteText}>{musicDoc.name != '' ? `Музыка: ` + musicDoc.name : 'Картинка: '}</label>
+            <div>
+              <div className={styles.whiteText}>Текст: </div>
+              <input value={newMessage} onChange={onChangeNewMessage} />
+            </div>
+            <div>
+              <button onClick={uploadUserData}>Отправить</button>
+              {errorCode.code === 0 ? 'Всё норм' : errorCode.code + errorCode.errorText}
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );

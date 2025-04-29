@@ -3,27 +3,34 @@ import { db } from "@/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
+type docType = {
+  url: string, name: string
+}
+type userType = {
+  imageDoc: docType, musicDoc: docType, message: string, login: string
+}
+
 const Main = () => {
   const { auth } = useAuth();
-  const [url, setUrl] = useState('')
-  const [userData, setUserData] = useState({ imageUrl: '', musicUrl: '' })
+  const [userData, setUserData] = useState({ imageDoc: { url: '', name: '' }, musicDoc: { url: '', name: '' }, login: '', message: '' } as userType)
   const displayName = auth.currentUser?.displayName
   useEffect(() => {
     if (displayName) {
       onSnapshot(doc(db, 'gameSpace', displayName), (doc) => {
-        setUserData(doc.data() as { imageUrl: '', musicUrl: '' })
+        setUserData(doc.data() as userType)
       })
     }
   }, [displayName])
-  const onClickButton = () => {
-    setUrl(userData.imageUrl)
-  }
+
   return (
     <>
       <h1>Игра</h1>
-      <button onClick={onClickButton}></button>
-      <div><img src={userData.imageUrl} alt='Image_Broken'></img>
-        <img src={url} alt='Image_Broken'></img></div>
+      <div>
+        <img src={userData.imageDoc.url} alt='Image_Broken'></img>
+      </div>
+      <div style={{ color: 'white' }}>
+        {userData.message}
+      </div>
     </>
   );
 };
